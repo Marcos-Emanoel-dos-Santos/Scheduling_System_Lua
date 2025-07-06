@@ -1,4 +1,4 @@
-_G.TaskUtils = require("methods")
+_G.TaskUtils = require("taskMethods")
 local task_list = TaskUtils.loadJSON("db.json")
 
 print("Bem-vindo ao sistema de tarefas.")

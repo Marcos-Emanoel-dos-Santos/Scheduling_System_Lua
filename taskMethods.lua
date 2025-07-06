@@ -4,6 +4,7 @@ local json = require("json")
 local TaskUtils = {}
 
 
+-- Loading and saving the db.json file that stores data about every user.
 function TaskUtils.loadJSON(fileName)
     local file = assert(io.open(fileName, "r"))
     local content = file:read("*a")
@@ -18,6 +19,7 @@ function TaskUtils.saveJSON(fileName, data)
 end
 
 
+-- Creates a menu that returns the decisions of users on what to do next.
 function TaskUtils.showMenu()
     local answer = tonumber(io.read("*l"))
     while (answer < 1 or answer > 4) and answer ~= 99 do
@@ -28,22 +30,54 @@ function TaskUtils.showMenu()
 end
 
 
+-- Verification of date consistency considering leap years, returning true if the date is valid or false if it is not.
+function TaskUtils.valiDATE(date)
+    local monthRelation = {
+        31, -- january
+        28, -- february
+        31, -- march
+        30, -- april
+        31, -- may
+        30, -- june
+        31, -- july
+        31, -- august
+        30, -- september
+        31, -- october
+        30, -- november
+        31 -- december
+    }
+    if type(date) ~= "string" then date = tostring(date) end
+    if date == "-1" then return true end
+    local leapYear = tonumber(date:sub(1, 4))%4 == 0
+    local month = tonumber(date:sub(5, 6))
+    local day = tonumber(date:sub(7, 8))
+
+    local exceptionFebruary = leapYear and day == 29 and monthRelation[month] == 2
+
+    if month < 1 or month > 12 then return false end
+    if day > monthRelation[month] and not exceptionFebruary then return false end
+    return true
+end
+
+
+-- Creation of a new task based on user's input.
 function TaskUtils.newTask()
     print("Escreva as informações do compromisso que deseja criar ou digite -1 se o compromisso não contê-las.")
     print("Digite o titulo do compromisso:")
     local title = io.read("*l")
     print("Digite a descriçao do compromisso:")
     local description = io.read("*l")
-    print("Digite a data do compromisso:")
+    print("Digite a data do compromisso.")
     local date = nil
     repeat
-        print("Digite a data no formato DD/MM/AAAA:")
+        print("A data deve estar no formato DD/MM/AAAA:")
         date = io.read()
-    until date:match("^%d%d/%d%d/%d%d%d%d$")
+    until date:match("^%d%d/%d%d/%d%d%d%d$") and TaskUtils.valiDATE(TaskUtils.encodeDate(date)) or date == "-1"
     return {_title = title, _description = description, _date = date}
 end
 
 
+-- Substitutes every -1 with the message "Sem [...]".
 function TaskUtils.verifyTask(task)
     if task._title == "-1" then task._title = "Sem titulo" end
     if task._description == "-1" then task._description = "Sem descriçao" end
@@ -52,12 +86,16 @@ function TaskUtils.verifyTask(task)
 end
 
 
+-- Returns a date in the form YYYYMMDD. If it has no date, the output is defined to 99999999
 function TaskUtils.encodeDate(date)
+    if date == "Sem data" then return 99999999 end
     local day, month, year = date:match("(%d%d)/(%d%d)/(%d%d%d%d)")
     return tonumber(year..month..day)
 end
 
+-- Returns a date in the form DD/MM/YYYY. If no date is defined, the output will be "Sem data"
 function TaskUtils.decodeDate(number)
+    if number == 99999999 then return "Sem data" end
     local str = tostring(number)
     local year = str:sub(1, 4)
     local month = str:sub(5, 6)
@@ -66,11 +104,13 @@ function TaskUtils.decodeDate(number)
 end
 
 
+-- Orders every task in chronological order.
 function TaskUtils.orderTasks(task_list)
     table.sort(task_list, function(a, b) return a._date < b._date end)
 end
 
 
+-- Allows the creation of any two variable function. It was used to compare an input and an expected result (not needed at all, just testing my closure manipulation skills).
 function TaskUtils.verifyCondition(condition)
     return function(inp, exp)
         if condition(inp,exp) then return true
@@ -79,7 +119,8 @@ function TaskUtils.verifyCondition(condition)
 end
 
 
-function TaskUtils.editData(list, ID)
+-- Edits the title, description or date of any specified task.
+function TaskUtils.editData(task, ID)
     print("O que deseja editar? (titulo | descricao | data | cancelar)")
     local answer = io.read("*l")
     while answer ~= "titulo" and answer ~= "descricao" and answer ~= "data" and answer ~= "cancelar" do
@@ -93,44 +134,21 @@ function TaskUtils.editData(list, ID)
     if condition(answer, "titulo") then
         print("Digite o novo titulo:")
         value = io.read("*l")
-        list[ID]._title = value
+        task[ID]._title = value
     elseif condition(answer, "descricao") then
         print("Digite anvoa descriçao:")
         value = io.read("*l")
-        list[ID]._description = value
+        task[ID]._description = value
     elseif condition(answer, "data") then
         print("Digite a nova data.")
         repeat
             print("Utilize o formato DD/MM/AAAA:")
-            value = io.read()
-        until value:match("^%d%d/%d%d/%d%d%d%d$")
-        list[ID]._date = TaskUtils.encodeDate(value)
+            value = io.read("*l")
+        until value:match("%d%d/%d%d/%d%d%d%d") and TaskUtils.valiDATE(TaskUtils.encodeDate(value)) or value == "-1"
+        task[ID]._date = TaskUtils.encodeDate(value)
     end
 end
 
-
---[[
-Users = {}
-Users.__index = Users
-
-function Users:new()
-    local instance = setmetatable({}, Users)
-    return instance
-end
-
-function Users:add(user)
-    table.insert(Users, user)
-end
-
-function Users:auth(username, psswd)
-    for v in ipairs(Users) do
-        if v._name == username and v._psswd == psswd then
-            return true
-        end
-    end
-    return false
-end
-]]
 
 -- MAIN.LUA OPTIONS METHODS
 
