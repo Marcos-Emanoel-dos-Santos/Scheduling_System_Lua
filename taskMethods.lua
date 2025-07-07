@@ -148,53 +148,47 @@ end
 
 
 function TaskUtils.viewTasks(task_list, id_Option)
-    if id_Option == nil then id_Option = false end
-    if #task_list > 0 then
-        if id_Option == true then
-            for i, task in ipairs(task_list) do
-                print("Id: "..i)
-                print(task._title)
-                print(task._description)
-                print(TaskUtils.decodeDate(task._date))
-                print()
-            end
-        else
-            for i, task in ipairs(task_list) do
-                print(task._title)
-                print(task._description)
-                print(TaskUtils.decodeDate(task._date))
-                print()
-            end
-        end
-    else
+    id_Option = id_Option or false
+    if #task_list == 0 then
         print("Nenhum compromisso cadastrado na sua listagem.")
+        print()
+        return false
     end
+
+    for i, task in ipairs(task_list) do
+        if id_Option == true then print("Id: "..i) end
+        print(task._title)
+        print(task._description)
+        print(TaskUtils.decodeDate(task._date))
+        print()
+    end
+    return true
 end
 
 
 function TaskUtils.editTask(task_list)
-    TaskUtils.viewTasks(task_list, true)
+    if not TaskUtils.viewTasks(task_list, true) then return end
     local taskID = nil
     repeat
         print("Selecione o ID da task deseja editar.")
         taskID = tonumber(io.read("*l"))
-    until
-        taskID > 0 and taskID <= #task_list
+    until taskID > 0 and taskID <= #task_list
     TaskUtils.viewTasks({task_list[taskID]})
-    TaskUtils.editData(task_list, taskID)
 end
 
 
 function TaskUtils.cancelTask(task_list)
     TaskUtils.viewTasks(task_list, true)
-    print("Digite o ID do compromisso que deseja cancelar (ou digite 'A' para cancelar todos)")
-    local answer = io.read("*l")
-    if string.lower(answer) == "a" then
-        for i=#task_list, 0, -1 do
-            table.remove(task_list, i)
+    if not #task_list == 0 then
+        print("Digite o ID do compromisso que deseja cancelar (ou digite 'A' para cancelar todos)")
+        local answer = io.read("*l")
+        if string.lower(answer) == "a" then
+            for i=#task_list, 0, -1 do
+                table.remove(task_list, i)
+            end
+        else
+            table.remove(task_list, answer)
         end
-    else
-        table.remove(task_list, answer)
     end
 end
 
