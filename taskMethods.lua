@@ -1,22 +1,7 @@
-local json = require("json")
+local userMethods = require("userMethods")
 
 
 local TaskUtils = {}
-
-
--- Loading and saving the db.json file that stores data about every user.
-function TaskUtils.loadJSON(fileName)
-    local file = assert(io.open(fileName, "r"))
-    local content = file:read("*a")
-    file:close()
-    return json.decode(content)
-end
-
-function TaskUtils.saveJSON(fileName, data)
-    local file = assert(io.open(fileName, "w"))
-    file:write(json.encode(data))
-    file:close()
-end
 
 
 -- Creates a menu that returns the decisions of users on what to do next.
@@ -150,7 +135,7 @@ function TaskUtils.editData(task, ID)
 end
 
 
--- MAIN.LUA OPTIONS METHODS
+-- MAIN.LUA METHODS
 
 function TaskUtils.createTask(task_list)
     local task = TaskUtils.verifyTask(TaskUtils.newTask())
@@ -159,7 +144,6 @@ function TaskUtils.createTask(task_list)
     print()
     print("Compromisso criado com sucesso!")
     print()
-    TaskUtils.saveJSON("db.json", task_list)
 end
 
 
