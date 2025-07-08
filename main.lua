@@ -18,6 +18,7 @@ while true do
     local user
     if account_option == "1" then
         usersTable:add(usersTable:createAccount())
+        userMethods.saveJSON("db.json", usersTable)
     elseif account_option == "2" then
         user = usersTable:login()
     else
