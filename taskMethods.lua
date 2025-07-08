@@ -4,12 +4,22 @@ local userMethods = require("userMethods")
 local TaskUtils = {}
 
 
+local function contains(table, value)
+    for _, v in ipairs(table) do
+        if v == value then
+            return true
+        end
+    end
+    return false
+end
+
 -- Creates a menu that returns the decisions of users on what to do next.
 function TaskUtils.showMenu()
-    local answer = tonumber(io.read("*l"))
-    while (answer < 1 or answer > 4) and answer ~= 99 do
+    local possibleAnswers = {"1", "2", "3", "4", "99"}
+    local answer = io.read("*l")
+    while not contains(possibleAnswers, answer) do
         print("Digite uma resposta valida.")
-        answer = tonumber(io.read("*l"))
+        answer = io.read("*l")
     end
     return answer
 end
@@ -47,7 +57,7 @@ end
 
 -- Creation of a new task based on user's input.
 function TaskUtils.newTask()
-    print("Escreva as informações do compromisso que deseja criar ou digite -1 se o compromisso não contê-las.")
+    print("Escreva as informações do compromisso que deseja criar ou apenas pressione Enter se o compromisso não contê-las.")
     print("Digite o titulo do compromisso:")
     local title = io.read("*l")
     print("Digite a descriçao do compromisso:")
@@ -64,9 +74,9 @@ end
 
 -- Substitutes every -1 with the message "Sem [...]".
 function TaskUtils.verifyTask(task)
-    if task._title == "-1" then task._title = "Sem titulo" end
-    if task._description == "-1" then task._description = "Sem descriçao" end
-    if task._date == "-1" then task._date = "Sem data" end
+    if task._title == "" then task._title = "Sem titulo" end
+    if task._description == "" then task._description = "Sem descriçao" end
+    if task._date == "" then task._date = "Sem data" end
     return task
 end
 
@@ -174,12 +184,13 @@ function TaskUtils.editTask(task_list)
         taskID = tonumber(io.read("*l"))
     until taskID > 0 and taskID <= #task_list
     TaskUtils.viewTasks({task_list[taskID]})
+    TaskUtils.editData(task_list, taskID)
 end
 
 
 function TaskUtils.cancelTask(task_list)
-    TaskUtils.viewTasks(task_list, true)
-    if not #task_list == 0 then
+    local qtd = TaskUtils.viewTasks(task_list, true) or true
+    if qtd then
         print("Digite o ID do compromisso que deseja cancelar (ou digite 'A' para cancelar todos)")
         local answer = io.read("*l")
         if string.lower(answer) == "a" then

@@ -25,7 +25,6 @@ while true do
     end
 
     while not exit and user ~= nil do
-        userMethods.saveJSON("db.json", usersTable)
         print("Bem vindo de volta, "..user._name.."!")
         print([[O que deseja fazer?
     1 - Criar novo compromisso.
@@ -36,25 +35,28 @@ while true do
 
         local answer = TaskUtils.showMenu()
 
-        if answer == 1 then
+        if answer == "1" then
             TaskUtils.createTask(user._task_list)
             TaskUtils.orderTasks(user._task_list)
+            userMethods.saveJSON("db.json", usersTable)
 
-        elseif answer == 2 then
+        elseif answer == "2" then
             TaskUtils.viewTasks(user._task_list, true)
 
-        elseif answer == 3 then
+        elseif answer == "3" then
             TaskUtils.editTask(user._task_list)
             TaskUtils.orderTasks(user._task_list)
-
-        elseif answer == 4 then
-            TaskUtils.cancelTask(user._task_list)
-
-        elseif answer == 99 then
             userMethods.saveJSON("db.json", usersTable)
+
+        elseif answer == "4" then
+            TaskUtils.cancelTask(user._task_list)
+            userMethods.saveJSON("db.json", usersTable)
+
+        elseif answer == "99" then
             break
         end
     end
     if exit then break end
 end
+
 print("PROGRAMA FINALIZADO.")
